@@ -1,3 +1,9 @@
-site_name: Мой Статический Сайт
+site_name: Мой Кастомный Сайт
+site_description: Привет, это кастомный сайт на MkDocs
+
 theme:
-  name: material
+  name: null
+  custom_dir: 'my_theme'
+
+extra_css:
+  - css/style.css

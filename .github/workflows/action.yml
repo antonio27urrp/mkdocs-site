@@ -1,19 +1,34 @@
-name: Publish docs via GitHub Pages
+name: Custom Theme Build and Deploy
 on:
   push:
-    branches:
-      - main  # или master, проверьте имя вашей ветки
+    branches: [main]
 
 permissions:
   contents: write
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # 1. Подготовка Node.js для фронтенда
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm install
+
+      # 2. Валидация HTML (предварительная проверка шаблонов)
+      - run: npx htmlhint "my_theme/**/*.html"
+
+      # 3. Обработка CSS через PostCSS (Автопрефиксы и минификация)
+      - run: npx postcss my_theme/css/style.css -u autoprefixer cssnano -o my_theme/css/style.css
+
+      # 4. Подготовка Python и MkDocs
       - uses: actions/setup-python@v5
         with:
           python-version: 3.x
-      - run: pip install mkdocs mkdocs-material
+      - run: pip install mkdocs
+
+      # 5. Сборка и деплой
       - run: mkdocs gh-deploy --force
