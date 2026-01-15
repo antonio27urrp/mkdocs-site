@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Привет, это кастомный сайт на MkDocs">
+    <meta name="author" content="Ваше Имя">
+    <title>Отчет по развертыванию статического сайта - Мой Кастомный Сайт</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Мой Кастомный Сайт</h1>
+        <nav>
+            
+                <a href=".">Отчет по развертыванию статического сайта</a>
+            
+        </nav>
+    </header>
+
+    <main>
+        <h1 id="_1">Отчет по развертыванию статического сайта</h1>
+<h2 id="1">1. Цель работы</h2>
+<p>Целью работы было создание и развертывание собственного статического сайта на основе предоставленных материалов с использованием генератора статических сайтов на Python, а также настройка автоматического CI/CD-деплоя и исследование вариантов продакшен-деплоя и CDN.</p>
+<hr />
+<h2 id="2">2. Используемые технологии и инструменты</h2>
+<ul>
+<li><strong>Язык программирования:</strong> Python (актуальная версия)</li>
+<li><strong>Генератор статических сайтов:</strong> MkDocs</li>
+<li><strong>Система контроля версий:</strong> Git</li>
+<li><strong>Хостинг статического сайта:</strong> GitHub Pages</li>
+<li><strong>CI/CD:</strong> GitHub Actions (workflow типа <em>Static HTML</em>)</li>
+<li><strong>Среда изоляции:</strong> virtualenv</li>
+<li><strong>Альтернативные платформы (исследование):</strong> GitVerse, Helios</li>
+</ul>
+<hr />
+<h2 id="3">3. Подготовка окружения</h2>
+<h3 id="31-python-pip">3.1 Установка Python и pip</h3>
+<p>Проверка наличия Python и pip:</p>
+<pre><code class="language-bash">python --version
+pip --version
+</code></pre>
+<p>При необходимости был установлен Python актуальной версии с официального сайта.</p>
+<h3 id="32-virtualenv">3.2 Установка virtualenv</h3>
+<pre><code class="language-bash">pip install virtualenv
+</code></pre>
+<h3 id="33">3.3 Создание и активация виртуального окружения</h3>
+<pre><code class="language-bash">mkdir static-site
+cd static-site
+virtualenv venv
+source venv/bin/activate  # Linux / macOS
+venv\Scripts\activate     # Windows
+</code></pre>
+<hr />
+<h2 id="4-mkdocs">4. Создание статического сайта с использованием MkDocs</h2>
+<h3 id="41-mkdocs">4.1 Установка MkDocs</h3>
+<pre><code class="language-bash">pip install mkdocs
+</code></pre>
+<h3 id="42">4.2 Инициализация проекта</h3>
+<pre><code class="language-bash">mkdocs new .
+</code></pre>
+<p>Структура проекта:</p>
+<pre><code>.
+├── docs/
+│   └── index.md
+├── mkdocs.yml
+└── venv/
+</code></pre>
+<h3 id="43">4.3 Наполнение контентом</h3>
+<p>На основе материалов, предоставленных по ссылке Яндекс.Диска, был подготовлен контент и оформлен в формате Markdown в каталоге <code>docs/</code>.</p>
+<p>Локальный запуск для проверки:</p>
+<pre><code class="language-bash">mkdocs serve
+</code></pre>
+<hr />
+<h2 id="5">5. Публикация репозитория</h2>
+<ol>
+<li>Создан репозиторий на GitHub.</li>
+<li>Исходный код проекта был закоммичен и отправлен в удаленный репозиторий:</li>
+</ol>
+<pre><code class="language-bash">git init
+git add .
+git commit -m &quot;Initial MkDocs site&quot;
+git branch -M main
+git remote add origin https://github.com/&lt;username&gt;/&lt;repo&gt;.git
+git push -u origin main
+</code></pre>
+<hr />
+<h2 id="6-cicd-github-pages">6. Настройка CI/CD и деплоя на GitHub Pages</h2>
+<h3 id="61-github-actions">6.1 GitHub Actions</h3>
+<p>В репозитории был создан workflow <code>.github/workflows/deploy.yml</code>.</p>
+<p>Пример конфигурации:</p>
+<pre><code class="language-yaml">name: Deploy MkDocs to GitHub Pages
+
+on:
+  push:
+    branches: [ &quot;main&quot; ]
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - run: pip install mkdocs
+      - run: mkdocs build
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+</code></pre>
+<h3 id="62-github-pages">6.2 Активация GitHub Pages</h3>
+<ul>
+<li>В настройках репозитория включен GitHub Pages</li>
+<li>Источник: ветка <code>gh-pages</code></li>
+</ul>
+<hr />
+<h2 id="7-helios">7. Альтернативный деплой: Helios</h2>
+<p>Был рассмотрен вариант деплоя на Helios:</p>
+<ul>
+<li>Регистрация и активация аккаунта</li>
+<li>Создание нового статического сервера</li>
+<li>Корректировка CI/CD (замена шага публикации на загрузку через SCP/rsync или API Helios)</li>
+</ul>
+<p>Пример изменений в workflow:</p>
+<ul>
+<li>Добавление секретов (SSH_KEY, HOST)</li>
+<li>Использование <code>scp</code> для загрузки содержимого каталога <code>site/</code></li>
+</ul>
+<hr />
+<h2 id="8-cdn">8. Исследование CDN</h2>
+<h3 id="81-cdn">8.1 Отечественные CDN</h3>
+<p>Возможные варианты использования CDN для ускорения доставки контента:</p>
+<ul>
+<li><strong>Яндекс Cloud CDN</strong> – интеграция с Object Storage и статическими сайтами</li>
+<li><strong>VK Cloud CDN</strong> – подходит для публичных сайтов и медиаконтента</li>
+<li><strong>Selectel CDN</strong> – поддержка HTTPS, кастомных доменов</li>
+</ul>
+<p>Преимущества:</p>
+<ul>
+<li>Снижение задержек</li>
+<li>Кэширование контента</li>
+<li>Защита от DDoS</li>
+</ul>
+<hr />
+<h2 id="9-gitverse-cicd">9. GitVerse и CI/CD</h2>
+<p><strong>GitVerse</strong> — отечественная платформа с поддержкой:</p>
+<ul>
+<li>Git-репозиториев</li>
+<li>CI/CD пайплайнов</li>
+<li>Аналога GitHub Actions</li>
+</ul>
+<p>Возможности:</p>
+<ul>
+<li>Автоматическая сборка статических сайтов</li>
+<li>Деплой на серверы или объектное хранилище</li>
+<li>Подходит для импортозамещения</li>
+</ul>
+<hr />
+<h2 id="10">10. Варианты деплоя статического сайта в продакшен</h2>
+<h3 id="_2">Основные подходы:</h3>
+<ol>
+<li><strong>GitHub Pages / GitVerse Pages</strong></li>
+<li>Минимальная настройка</li>
+<li>
+<p>Бесплатно</p>
+</li>
+<li>
+<p><strong>Объектное хранилище + CDN</strong></p>
+</li>
+<li>Яндекс Object Storage + CDN</li>
+<li>
+<p>AWS S3 + CloudFront</p>
+</li>
+<li>
+<p><strong>VPS / собственный сервер</strong></p>
+</li>
+<li>Nginx / Caddy</li>
+<li>
+<p>rsync / Docker</p>
+</li>
+<li>
+<p><strong>PaaS-платформы</strong></p>
+</li>
+<li>Netlify</li>
+<li>Vercel</li>
+</ol>
+<h3 id="_3">Необходимые инструменты:</h3>
+<ul>
+<li>CI/CD (GitHub Actions, GitVerse CI)</li>
+<li>SSH / API-токены</li>
+<li>Web-сервер (Nginx)</li>
+<li>CDN</li>
+</ul>
+<hr />
+<h2 id="11">11. Результат работы</h2>
+<ul>
+<li>Статический сайт успешно создан с использованием MkDocs</li>
+<li>Настроен автоматический деплой через CI/CD</li>
+<li>Сайт доступен в сети</li>
+<li>Проведено исследование вариантов хостинга, CDN и CI/CD</li>
+</ul>
+<hr />
+<h2 id="12">12. Выводы</h2>
+<p>В ходе работы был освоен полный цикл создания и публикации статического сайта: от локальной разработки до продакшен-деплоя с автоматизацией. Полученные знания применимы для документации, лендингов и технических проектов.</p>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Мой Кастомный Сайт. Собрано с помощью MkDocs.</p>
+    </footer>
+    <script src="js/main.js"></script>
+</body>
+</html>
